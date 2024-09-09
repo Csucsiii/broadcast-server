@@ -3,16 +3,18 @@ import fs from "fs";
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import nocache from "nocache";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const app = express();
 app.use(express.json());
+app.use(nocache());
 
 let isPlaying = false;
 let startTime: number | null = null;
 
-const videoPath = path.join(__dirname, "movie", "video.mp4");
+const videoPath = path.join(__dirname, "movie", "deadpool2.mp4");
 console.log(videoPath);
 
 let videoDuration = 0;
@@ -28,7 +30,8 @@ ffmpeg.ffprobe(videoPath, (err, metadata) => {
 app.post("/play", (req, res) => {
     if (!isPlaying){
         isPlaying = true;
-        startTime = Date.now();
+        // startTime = Date.now();
+        startTime = Date.now() - 4620000;
         console.log("Video started");
         res.status(200).send({ message: "Video has started" });
     }else{
@@ -66,6 +69,8 @@ app.get("/video", (req, res) => {
     }
 
     const startSeconds = elapsed / 1000;
+
+    console.log(req.headers.range);
 
     ffmpeg(videoPath)
         .setStartTime(startSeconds)
